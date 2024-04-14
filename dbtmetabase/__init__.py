@@ -2,10 +2,12 @@ import logging
 
 from .core import DbtMetabase
 from .format import Filter
+from ._models import ModelDescription
 
 __all__ = [
     "DbtMetabase",
     "Filter",
+    "ModelDescription"
 ]
 
 try:
