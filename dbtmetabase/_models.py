@@ -17,7 +17,12 @@ _logger = logging.getLogger(__name__)
 class ModelDescription:
     model_description: Optional[str]
     column_descriptions: Optional[Dict[str, str]]
-    def __init__(self, model_description: Optional[str] = None, column_descriptions: Optional[Dict[str, str]] = None):
+
+    def __init__(
+        self,
+        model_description: Optional[str] = None,
+        column_descriptions: Optional[Dict[str, str]] = None,
+    ):
         self.model_description = model_description
         self.column_descriptions = column_descriptions
 
