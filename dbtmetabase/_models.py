@@ -6,8 +6,6 @@ import time
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, Mapping, MutableMapping, Optional
 
-from attr import dataclass
-
 from .errors import MetabaseStateError
 from .format import Filter, NullValue, safe_name
 from .manifest import DEFAULT_SCHEMA, Column, Group, Manifest, Model
@@ -16,10 +14,12 @@ from .metabase import Metabase
 _logger = logging.getLogger(__name__)
 
 
-@dataclass
 class ModelDescription:
     model_description: Optional[str]
     column_descriptions: Optional[Dict[str, str]]
+    def __init__(self, model_description: Optional[str] = None, column_descriptions: Optional[Dict[str, str]] = None):
+        self.model_description = model_description
+        self.column_descriptions = column_descriptions
 
 
 class ModelsMixin(metaclass=ABCMeta):
@@ -131,7 +131,7 @@ class ModelsMixin(metaclass=ABCMeta):
                 docs_url=docs_url,
                 order_fields=order_fields,
                 default_model_descriptions=(
-                    default_models_descriptions.get(model.name)
+                    default_models_descriptions.get(f"{model.schema}.{model.alias}")
                     if default_models_descriptions
                     else None
                 ),
