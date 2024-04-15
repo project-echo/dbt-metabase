@@ -242,7 +242,7 @@ class ModelsMixin(metaclass=ABCMeta):
                 schema_name=schema_name,
                 model_name=model_name,
                 column=column,
-                column_description=default_columns_descriptions.get(column.name),
+                default_column_description=default_columns_descriptions.get(column.name),
             )
 
         if order_fields:
@@ -317,7 +317,7 @@ class ModelsMixin(metaclass=ABCMeta):
         schema_name: str,
         model_name: str,
         column: Column,
-        column_description: Optional[str],
+        default_column_description: Optional[str],
     ) -> bool:
         """Exports one dbt column to Metabase database schema."""
 
@@ -382,7 +382,7 @@ class ModelsMixin(metaclass=ABCMeta):
                 )
 
         # Empty strings not accepted by Metabase
-        column_description = column.description or column_description or None
+        column_description = column.description or default_column_description or None
         column_display_name = column.display_name or None
         column_visibility = column.visibility_type or "normal"
 
