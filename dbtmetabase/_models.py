@@ -242,7 +242,9 @@ class ModelsMixin(metaclass=ABCMeta):
                 schema_name=schema_name,
                 model_name=model_name,
                 column=column,
-                default_column_description=default_columns_descriptions.get(column.name),
+                default_column_description=default_columns_descriptions.get(
+                    column.name
+                ),
             )
 
         if order_fields:

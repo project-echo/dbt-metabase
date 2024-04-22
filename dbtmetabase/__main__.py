@@ -27,10 +27,14 @@ def _click_list_option_kwargs() -> Mapping[str, Any]:
         if value is None:
             return None
 
-        if ctx.get_parameter_source(str(param.name)) in (
-            click.core.ParameterSource.DEFAULT,
-            click.core.ParameterSource.DEFAULT_MAP,
-        ) and isinstance(value, list):
+        if (
+            ctx.get_parameter_source(str(param.name))
+            in (
+                click.core.ParameterSource.DEFAULT,
+                click.core.ParameterSource.DEFAULT_MAP,
+            )
+            and isinstance(value, list)
+        ):
             # Lists in defaults (config or option) should be lists
             return value
 
