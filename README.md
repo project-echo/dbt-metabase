@@ -305,3 +305,10 @@ c.extract_exposures(
 ```
 
 See function header comments for information about other parameters.
+
+# Starship
+```
+git tag ...
+make build
+```
+upload `dist/dbt_metabase-1.3.0-py3-none-any.whl` to Databricks `libs` volume.
