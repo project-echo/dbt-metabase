@@ -4,7 +4,7 @@ import dataclasses as dc
 import logging
 import time
 from abc import ABCMeta, abstractmethod
-from typing import Any, Iterable, Mapping, MutableMapping, Optional
+from typing import Any, Dict, Iterable, Mapping, MutableMapping, Optional
 
 from .errors import MetabaseStateError
 from .format import Filter, NullValue, safe_name
@@ -12,6 +12,19 @@ from .manifest import DEFAULT_SCHEMA, Column, Group, Manifest, Model
 from .metabase import Metabase
 
 _logger = logging.getLogger(__name__)
+
+
+class ModelDescription:
+    model_description: Optional[str]
+    column_descriptions: Optional[Dict[str, str]]
+
+    def __init__(
+        self,
+        model_description: Optional[str] = None,
+        column_descriptions: Optional[Dict[str, str]] = None,
+    ):
+        self.model_description = model_description
+        self.column_descriptions = column_descriptions
 
 
 class ModelsMixin(metaclass=ABCMeta):
@@ -42,6 +55,7 @@ class ModelsMixin(metaclass=ABCMeta):
         append_tags: bool = False,
         docs_url: Optional[str] = None,
         order_fields: bool = False,
+        default_models_descriptions: Optional[Dict[str, ModelDescription]] = None,
     ):
         """Exports dbt models to Metabase database schema.
 
@@ -121,6 +135,11 @@ class ModelsMixin(metaclass=ABCMeta):
                 append_tags=append_tags,
                 docs_url=docs_url,
                 order_fields=order_fields,
+                default_model_descriptions=(
+                    default_models_descriptions.get(f"{model.schema}.{model.alias}")
+                    if default_models_descriptions
+                    else None
+                ),
             )
 
         for update in ctx.updates.values():
@@ -157,6 +176,7 @@ class ModelsMixin(metaclass=ABCMeta):
         append_tags: bool,
         docs_url: Optional[str],
         order_fields: bool,
+        default_model_descriptions: Optional[ModelDescription],
     ) -> bool:
         """Exports one dbt model to Metabase database schema."""
 
@@ -173,7 +193,11 @@ class ModelsMixin(metaclass=ABCMeta):
 
         # Empty strings not accepted by Metabase
         model_display_name = model.display_name or None
-        model_description = model.format_description(append_tags, docs_url) or None
+        model_description = model.format_description(append_tags, docs_url) or (
+            default_model_descriptions.model_description
+            if default_model_descriptions
+            else None
+        )
         model_points_of_interest = model.points_of_interest or None
         model_caveats = model.caveats or None
         model_visibility = model.visibility_type or None
@@ -205,12 +229,20 @@ class ModelsMixin(metaclass=ABCMeta):
         else:
             _logger.info("Table '%s' is up to date", table_key)
 
+        default_columns_descriptions = (
+            default_model_descriptions.column_descriptions
+            if default_model_descriptions
+            and default_model_descriptions.column_descriptions
+            else dict()
+        )
+
         for column in model.columns:
             success &= self.__export_column(
                 ctx,
                 schema_name=schema_name,
                 model_name=model_name,
                 column=column,
+                default_column_description=default_columns_descriptions.get(column.name),
             )
 
         if order_fields:
@@ -285,6 +317,7 @@ class ModelsMixin(metaclass=ABCMeta):
         schema_name: str,
         model_name: str,
         column: Column,
+        default_column_description: Optional[str],
     ) -> bool:
         """Exports one dbt column to Metabase database schema."""
 
@@ -349,7 +382,7 @@ class ModelsMixin(metaclass=ABCMeta):
                 )
 
         # Empty strings not accepted by Metabase
-        column_description = column.description or None
+        column_description = column.description or default_column_description or None
         column_display_name = column.display_name or None
         column_visibility = column.visibility_type or "normal"
 

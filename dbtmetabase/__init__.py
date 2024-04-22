@@ -1,12 +1,10 @@
 import logging
 
+from ._models import ModelDescription
 from .core import DbtMetabase
 from .format import Filter
 
-__all__ = [
-    "DbtMetabase",
-    "Filter",
-]
+__all__ = ["DbtMetabase", "Filter", "ModelDescription"]
 
 try:
     from ._version import __version__ as version  # type: ignore
